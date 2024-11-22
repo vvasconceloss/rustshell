@@ -2,12 +2,18 @@
 use std::io::{self, Write};
 
 fn main() {
-    print!("$ ");
-    io::stdout().flush().unwrap();
+    loop {
+        print!("$ ");
+        io::stdout().flush().unwrap();
 
-    let stdin = io::stdin();
-    let mut user_input = String::new();
-    stdin.read_line(&mut user_input).unwrap();
+        let stdin = io::stdin();
+        let mut user_input = String::new();
+        stdin.read_line(&mut user_input).unwrap();
 
-    println!("{}: command not found", user_input.trim());
+        match user_input.trim().to_lowercase().as_str() {
+            "exit" => break,
+            "exit 0" => break,
+            _ => println!("{}: command not found", user_input.trim()),
+        }   
+    }
 }
