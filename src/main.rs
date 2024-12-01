@@ -39,8 +39,26 @@ impl Shell {
                 }
             }
             InternalCommand::Exit => {
-                println!("Exiting...");
                 std::process::exit(0);
+            }
+        }
+    }
+
+    fn execute_command(&mut self, input: String) {
+        self.history.push(input.clone());
+
+        if let Some(internal_command) = InternalCommand::parse_command(&input) {
+            self.execute_internal(internal_command);
+        } else {
+            let args: Vec<&str> = input.split_whitespace().collect();
+
+            match std::process::Command::new(args[0]).args(&args[1..]).spawn() {
+                Ok(mut child) => {
+                    child.wait().unwrap();
+                }
+                Err(e) => {
+                    eprintln!("error when executing this command: {}", e);
+                } 
             }
         }
     }
@@ -51,6 +69,8 @@ fn get_current_directory() -> std::io::Result<PathBuf> {
 }
 
 fn main() {
+    let mut shell = Shell::new();
+
     loop {
         let working_dir = get_current_directory().unwrap();
 
@@ -62,5 +82,7 @@ fn main() {
         stdin.read_line(&mut user_input).unwrap();
 
         let input_user = user_input.trim().to_lowercase().to_string();
+
+        shell.execute_command(input_user);
     }
 }
