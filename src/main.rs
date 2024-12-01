@@ -18,6 +18,34 @@ impl InternalCommand {
     }
 }
 
+struct Shell {
+    history: Vec<String>,
+}
+
+impl Shell {
+    fn new() -> Self {
+        Shell {
+            history: Vec::new(),
+        }
+    }
+
+    fn execute_internal(&mut self, command: InternalCommand) {
+        match command {
+            InternalCommand::Cd(path) => {
+                if path.is_empty() {
+                    eprintln!("error: this path was not recognized");
+                } else if let Err(e) = env::set_current_dir(path) {
+                    eprintln!("fails to change directory: {}", e);
+                }
+            }
+            InternalCommand::Exit => {
+                println!("Exiting...");
+                std::process::exit(0);
+            }
+        }
+    }
+}
+
 fn get_current_directory() -> std::io::Result<PathBuf> {
      env::current_dir()
 }
